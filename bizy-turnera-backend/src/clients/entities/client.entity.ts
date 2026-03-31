@@ -1,5 +1,6 @@
 import { Appointment } from 'src/appointments/entities/appointment.entity';
 import { Business } from 'src/business/entities/business.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
 import {
   Column,
   CreateDateColumn,
@@ -37,4 +38,9 @@ export class Client {
 
   @OneToMany(() => Appointment, (appointment) => appointment.client)
   appointments: Appointment[]
+
+  @OneToMany(() => Payment, (payment) => payment.client, {
+    cascade: true,
+  })
+  payments?: Payment[];
 }

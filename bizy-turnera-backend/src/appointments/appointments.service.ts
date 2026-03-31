@@ -70,6 +70,9 @@ export class AppointmentsService {
     if (overlapping)
       throw new BadRequestException('This time slot is already booked');
 
+    client.debt += service.price;
+    await this.clientRepository.save(client);
+
     const appointment = this.appointmentRepository.create({
       startAt: startDate,
       endAt: endDate,

@@ -1,9 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { AppointmentStatus } from '../enums/appointment-status.enum';
 import { Business } from 'src/business/entities/business.entity';
 import { Client } from 'src/clients/entities/client.entity';
 import { User } from 'src/auth/entities/user.entity';
 import { Service } from 'src/services/entities/service.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
 
 @Entity()
 export class Appointment {
@@ -44,4 +45,9 @@ export class Appointment {
     onDelete: 'SET NULL',
   })
   service: Service;
+
+  @OneToMany(() => Payment, (payment) => payment.appointment, {
+    cascade: true,
+  })
+  payments?: Payment[];
 }

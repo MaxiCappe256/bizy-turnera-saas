@@ -1,6 +1,7 @@
 import { Appointment } from 'src/appointments/entities/appointment.entity';
 import { User } from 'src/auth/entities/user.entity';
 import { Client } from 'src/clients/entities/client.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
 import { Service } from 'src/services/entities/service.entity';
 import {
   BeforeInsert,
@@ -44,6 +45,9 @@ export class Business {
   })
   @OneToMany(() => Appointment, (appointment) => appointment.business)
   appointments: Appointment[];
+
+  @OneToMany(() => Payment, (payment) => payment.business)
+  payments: Payment[];
 
   @BeforeInsert()
   @BeforeUpdate()

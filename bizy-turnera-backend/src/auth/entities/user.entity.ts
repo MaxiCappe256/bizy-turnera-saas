@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { Role } from '../enums/role.enum';
 import { Appointment } from 'src/appointments/entities/appointment.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
 
 @Entity()
 export class User {
@@ -49,6 +50,10 @@ export class User {
   @OneToMany(() => Appointment, (appointment) => appointment.user)
   appointments: Appointment[];
 
+  @OneToMany(() => Payment, (payment) => payment.user, {
+    cascade: true,
+  })
+  payments?: Payment[];
 
   @BeforeInsert()
   @BeforeUpdate()
