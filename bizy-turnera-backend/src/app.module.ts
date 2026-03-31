@@ -6,6 +6,7 @@ import { BusinessModule } from './business/business.module';
 import { ClientsModule } from './clients/clients.module';
 import { SeedModule } from './seed/seed.module';
 import { ServicesModule } from './services/services.module';
+import { AppointmentsModule } from './appointments/appointments.module';
 
 @Module({
   imports: [
@@ -37,6 +38,8 @@ import { ServicesModule } from './services/services.module';
     SeedModule,
 
     ServicesModule,
+
+    AppointmentsModule,
   ],
   controllers: [],
   providers: [],

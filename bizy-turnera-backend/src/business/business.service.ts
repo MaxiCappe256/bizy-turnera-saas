@@ -9,36 +9,29 @@ export class BusinessService {
   constructor(
     @InjectRepository(Business)
     private readonly businessRepository: Repository<Business>,
-  ) { }
+  ) {}
 
-  async findOne(business: Business) {
-
-    const businessDB = await this.businessRepository.findOne({
-      where: { id: business.id },
+  async findOne(businessId: string) {
+    const business = await this.businessRepository.findOne({
+      where: { id: businessId },
     });
 
-    if (!businessDB) {
-      throw new NotFoundException('Business not found');
-    }
+    if (!business) throw new NotFoundException('Business not found');
 
-    return businessDB;
+    return business;
   }
 
-  async getPlan(business: Business) {
+  async getPlan(businessId: string) {
+    const business = await this.findOne(businessId);
 
-    const businessDB = await this.findOne(business);
-
-    return {
-      plan: businessDB.plan,
-    };
+    return { plan: business.plan };
   }
 
-  async update(business: Business, updateBusinessDto: UpdateBusinessDto) {
+  async update(businessId: string, updateBusinessDto: UpdateBusinessDto) {
+    const business = await this.findOne(businessId);
 
-    const businessDB = await this.findOne(business);
+    Object.assign(business, updateBusinessDto);
 
-    Object.assign(businessDB, updateBusinessDto);
-
-    return this.businessRepository.save(businessDB);
+    return this.businessRepository.save(business);
   }
 }

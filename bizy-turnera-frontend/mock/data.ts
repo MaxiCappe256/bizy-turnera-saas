@@ -2,7 +2,6 @@
 // Mock data — desacoplado, listo para reemplazar por API
 // =========================================================
 
-export type EstadoTurno = "pendiente" | "completado" | "cancelado"
 export type MetodoPago = "efectivo" | "transferencia"
 export type EstadoDeuda = "al_dia" | "con_deuda"
 
@@ -25,22 +24,22 @@ export interface Cliente {
 //   { id: "c7", nombre: "Florencia Martínez", telefono: "+54 9 11 3333-4444", estadoDeuda: "con_deuda", deudaMonto: 800 },
 // ]
 
-// ----- Servicios -----
-export interface Servicio {
-  id: string
-  nombre: string
-  duracionMinutos: number
-  precio: number
-}
+// // ----- Servicios -----
+// export interface Servicio {
+//   id: string
+//   name: string
+//   duracionMinutos: number
+//   precio: number
 
-export const mockServicios: Servicio[] = [
-  { id: "s1", nombre: "Corte de cabello", duracionMinutos: 30, precio: 2500 },
-  { id: "s2", nombre: "Barba completa", duracionMinutos: 20, precio: 1800 },
-  { id: "s3", nombre: "Corte + Barba", duracionMinutos: 45, precio: 3800 },
-  { id: "s4", nombre: "Consulta nutricional", duracionMinutos: 60, precio: 5000 },
-  { id: "s5", nombre: "Consulta veterinaria", duracionMinutos: 40, precio: 4200 },
-  { id: "s6", nombre: "Tintura", duracionMinutos: 90, precio: 6500 },
-]
+
+// export const mockServicios: Servicio[] = [
+//   { id: "s1", nombre: "Corte de cabello", duracionMinutos: 30, precio: 2500 },
+//   { id: "s2", nombre: "Barba completa", duracionMinutos: 20, precio: 1800 },
+//   { id: "s3", nombre: "Corte + Barba", duracionMinutos: 45, precio: 3800 },
+//   { id: "s4", nombre: "Consulta nutricional", duracionMinutos: 60, precio: 5000 },
+//   { id: "s5", nombre: "Consulta veterinaria", duracionMinutos: 40, precio: 4200 },
+//   { id: "s6", nombre: "Tintura", duracionMinutos: 90, precio: 6500 },
+// ]
 
 // ----- Turnos -----
 export interface Turno {

@@ -1,78 +1,133 @@
 import { z } from "zod";
 
-// ----- Auth -----
+/* =========================
+   AUTH
+========================= */
+
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "El correo es obligatorio")
-    .email("Introduce un correo válido"),
+  email: z.string().email("Introduce un correo válido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
-export const loginResponse = z.object({
+export const loginResponseSchema = z.object({
   id: z.string(),
   email: z.string(),
   fullName: z.string(),
   role: z.string(),
-  businessId: z.string().nullable().optional(),
+  businessId: z.string(),
   token: z.string(),
 });
 
 export const registroSchema = z.object({
   fullName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  email: z
-    .string()
-    .min(1, "El correo es obligatorio")
-    .email("Introduce un correo válido"),
+  email: z.string().email("Introduce un correo válido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
   businessName: z.string().min(2, "El nombre del negocio es obligatorio"),
 });
 
-// ----- Clientes -----
+/* =========================
+   CLIENTS
+========================= */
+
 export const clienteSchema = z.object({
   fullName: z.string().min(2, "El nombre es obligatorio"),
-  phone: z
-    .string()
+  phone: z.string(),
 });
 
-// ----- Servicios -----
+export const clientResponseSchema = clienteSchema.extend({
+  id: z.string(),
+});
+
+/* =========================
+   SERVICES
+========================= */
+
 export const servicioSchema = z.object({
-  nombre: z.string().min(2, "El nombre del servicio es obligatorio"),
-  duracionMinutos: z
+  name: z.string().min(2, "El nombre del servicio es obligatorio"),
+  duration: z
     .number({ invalid_type_error: "Ingresá un número válido" })
-    .min(5, "La duración mínima es 5 minutos")
-    .max(480, "La duración máxima es 8 horas"),
-  precio: z
-    .number({ invalid_type_error: "Ingresá un precio válido" })
-    .min(0, "El precio no puede ser negativo"),
+    .min(5)
+    .max(480),
+  price: z.number({ invalid_type_error: "Ingresá un precio válido" }).min(0),
 });
 
-// ----- Turnos -----
-export const turnoSchema = z.object({
-  clienteId: z.string().min(1, "Seleccioná un cliente"),
-  servicioId: z.string().min(1, "Seleccioná un servicio"),
-  fecha: z.string().min(1, "La fecha es obligatoria"),
-  hora: z.string().min(1, "La hora es obligatoria"),
+export const serviceResponseSchema = servicioSchema.extend({
+  id: z.string(),
 });
 
-// ----- Pagos -----
+/* =========================
+   APPOINTMENTS
+========================= */
+
+export type EstadoTurno =
+  | "PENDING"
+  | "COMPLETED"
+  | "CANCELED"
+  | "pending"
+  | "completed"
+  | "canceled";
+
+/* FORM (crear turno) */
+export const turnoCreateSchema = z.object({
+  clientId: z.string().min(1, "Seleccioná un cliente"),
+  serviceId: z.string().min(1, "Seleccioná un servicio"),
+  userId: z.string().min(1, "Seleccioná un profesional"),
+  startAt: z.string(),
+  notes: z.string().optional(),
+});
+
+/* RESPONSE (mostrar turno) */
+export const appointmentSchema = z.object({
+  id: z.string(),
+  startAt: z.string(),
+  endAt: z.string(),
+  status: z.enum([
+    "PENDING",
+    "COMPLETED",
+    "CANCELED",
+    "pending",
+    "completed",
+    "canceled",
+  ]),
+  notes: z.string().nullable().optional(),
+
+  client: z.object({
+    id: z.string(),
+    fullName: z.string(),
+  }),
+
+  service: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+
+  user: z.object({
+    id: z.string(),
+    fullName: z.string(),
+  }),
+});
+
+/* =========================
+   PAYMENTS
+========================= */
+
 export const pagoSchema = z.object({
   clienteId: z.string().min(1, "Seleccioná un cliente"),
-  monto: z
-    .number({ invalid_type_error: "Ingresá un monto válido" })
-    .min(1, "El monto debe ser mayor a 0"),
-  metodo: z.enum(["efectivo", "transferencia"], {
-    required_error: "Seleccioná un método de pago",
-  }),
-  concepto: z.string().min(2, "El concepto es obligatorio"),
+  monto: z.number().min(1),
+  metodo: z.enum(["efectivo", "transferencia"]),
+  concepto: z.string().min(2),
 });
 
-// ----- Role -----
+/* =========================
+   ROLE
+========================= */
+
 export const roleSchema = z.enum(["admin", "staff"]);
-export type Role = z.infer<typeof roleSchema>;
 
+/* =========================
+   USER
+========================= */
 
-// ----- User -----
 export const userSchema = z.object({
   id: z.string(),
   fullName: z.string(),
@@ -82,8 +137,10 @@ export const userSchema = z.object({
   businessId: z.string(),
 });
 
+/* =========================
+   BUSINESS
+========================= */
 
-// ----- Business -----
 export const businessSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -93,12 +150,25 @@ export const businessSchema = z.object({
   updatedAt: z.string(),
 });
 
+/* =========================
+   TYPES
+========================= */
+
 export type LoginFormData = z.infer<typeof loginSchema>;
+export type LoginResponse = z.infer<typeof loginResponseSchema>;
 export type RegistroFormData = z.infer<typeof registroSchema>;
+
 export type ClienteFormData = z.infer<typeof clienteSchema>;
+export type Client = z.infer<typeof clientResponseSchema>;
+
 export type ServicioFormData = z.infer<typeof servicioSchema>;
-export type TurnoFormData = z.infer<typeof turnoSchema>;
+export type Service = z.infer<typeof serviceResponseSchema>;
+
+export type TurnoCreateData = z.infer<typeof turnoCreateSchema>;
+export type Appointment = z.infer<typeof appointmentSchema>;
+
 export type PagoFormData = z.infer<typeof pagoSchema>;
-export type LoginResponseData = z.infer<typeof loginResponse>;
+
 export type User = z.infer<typeof userSchema>;
 export type Business = z.infer<typeof businessSchema>;
+export type Role = z.infer<typeof roleSchema>;

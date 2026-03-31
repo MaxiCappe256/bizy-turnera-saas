@@ -1,39 +1,54 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Plus, Scissors } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { mockServicios } from "@/mock/data"
-import type { Servicio } from "@/mock/data"
-import { ServicioCard } from "@/components/panel/servicios/servicio-card"
-import { ServicioModal } from "@/components/panel/servicios/servicio-modal"
+import { useState } from "react";
+import { Plus, Scissors } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+import { ServicioCard } from "@/components/panel/servicios/servicio-card";
+import { ServicioModal } from "@/components/panel/servicios/servicio-modal";
+
+import { useServices } from "@/hooks/panel/services/useServices";
+import { useServiceCreate } from "@/hooks/panel/services/useServiceCreate";
+import { useServiceUpdate } from "@/hooks/panel/services/useServiceUpdate";
+
+import { useDebounce } from "@/hooks/useDebounce";
+import { Service, ServicioFormData } from "@/schemas";
+import { useServiceRemove } from "@/hooks/panel/services/useServiceRemove";
 
 export default function ServiciosPage() {
-  const [servicios, setServicios] = useState(mockServicios)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editando, setEditando] = useState<Servicio | null>(null)
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editando, setEditando] = useState<any | null>(null);
+  const [search, setSearch] = useState("");
 
-  function handleGuardar(data: { nombre: string; duracionMinutos: number; precio: number }) {
+  const debouncedSearch = useDebounce(search, 300);
+
+  const { data: servicios = [], isLoading } = useServices(debouncedSearch);
+
+  const { mutate: crearServicio } = useServiceCreate();
+  const { mutate: actualizarServicio } = useServiceUpdate();
+  const { mutate: eliminarServicio } = useServiceRemove();
+
+  function handleGuardar(data: ServicioFormData) {
     if (editando) {
-      setServicios((prev) =>
-        prev.map((s) => (s.id === editando.id ? { ...s, ...data } : s))
-      )
+      actualizarServicio({
+        id: editando.id,
+        data,
+      });
     } else {
-      const nuevo: Servicio = { id: `s${Date.now()}`, ...data }
-      setServicios((prev) => [...prev, nuevo])
+      crearServicio(data);
     }
-    setModalOpen(false)
-    setEditando(null)
+    setModalOpen(false);
+    setEditando(null);
   }
 
-  function handleEditar(s: Servicio) {
-    setEditando(s)
-    setModalOpen(true)
+  function handleEditar(servicio: Service) {
+    setEditando(servicio);
+    setModalOpen(true);
   }
 
   function handleEliminar(id: string) {
-    setServicios((prev) => prev.filter((s) => s.id !== id))
+    eliminarServicio(id);
   }
 
   return (
@@ -46,8 +61,12 @@ export default function ServiciosPage() {
             {servicios.length} servicios disponibles
           </p>
         </div>
+
         <Button
-          onClick={() => { setEditando(null); setModalOpen(true) }}
+          onClick={() => {
+            setEditando(null);
+            setModalOpen(true);
+          }}
           className="gap-2 self-start sm:self-auto"
         >
           <Plus className="h-4 w-4" />
@@ -62,9 +81,11 @@ export default function ServiciosPage() {
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
               <Scissors className="h-6 w-6 text-muted-foreground" />
             </div>
+
             <h3 className="text-base font-medium text-foreground">
               Todavía no creaste servicios
             </h3>
+
             <p className="mt-1 text-sm text-muted-foreground">
               Agregá los servicios que ofrecés con su duración y precio.
             </p>
@@ -72,7 +93,7 @@ export default function ServiciosPage() {
         </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {servicios.map((s) => (
+          {servicios.map((s: any) => (
             <ServicioCard
               key={s.id}
               servicio={s}
@@ -85,10 +106,13 @@ export default function ServiciosPage() {
 
       <ServicioModal
         open={modalOpen}
-        onClose={() => { setModalOpen(false); setEditando(null) }}
+        onClose={() => {
+          setModalOpen(false);
+          setEditando(null);
+        }}
         onGuardar={handleGuardar}
         servicio={editando}
       />
     </div>
-  )
+  );
 }

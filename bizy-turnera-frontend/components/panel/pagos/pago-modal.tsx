@@ -21,7 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { pagoSchema, type PagoFormData } from "@/schemas"
-import { mockClientes } from "@/mock/data"
 import type { Pago } from "@/mock/data"
 
 interface Props {

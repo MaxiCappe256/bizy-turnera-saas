@@ -6,9 +6,10 @@ export function useProfile() {
   return useQuery<User>({
     queryKey: ["profile"],
     queryFn: async () => {
-      const res = await api.get("/auth/profile");
+      const res = await api.get("/auth/me");
       return res.data;
     },
-    enabled: typeof window !== "undefined" && !!localStorage.getItem("token")
+    // SI ESTOY EN NAVEGADOR Y EXISTE TOKEN
+    enabled: typeof window !== "undefined" && !!localStorage.getItem("token"),
   });
 }

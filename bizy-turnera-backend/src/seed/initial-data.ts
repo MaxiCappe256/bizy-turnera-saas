@@ -1,60 +1,14 @@
+import { AppointmentStatus } from 'src/appointments/enums/appointment-status.enum';
 import { Role } from 'src/auth/enums/role.enum';
 
-export type SeedBusiness = {
-  name: string;
-  slug: string;
-  plan: 'free' | 'pro';
-};
-
-export type SeedUser = {
-  email: string;
-  password: string;
-  fullName: string;
-  role: Role;
-  businessSlug: string;
-};
-
-export type SeedClient = {
-  fullName: string;
-  phone?: string | null;
-  businessSlug: string;
-};
-
-export type SeedService = {
-  name: string;
-  price: number;
-  duration: number;
-  businessSlug: string;
-};
-
-interface SeedData {
-  businesses: SeedBusiness[];
-  users: SeedUser[];
-  clients: SeedClient[];
-  services: SeedService[];
-}
-
-export const initialData: SeedData = {
+export const initialData = {
   businesses: [
-    {
-      name: 'Urban Cuts',
-      slug: 'urban-cuts',
-      plan: 'pro',
-    },
-    {
-      name: 'Clínica Vital',
-      slug: 'clinica-vital',
-      plan: 'pro',
-    },
-    {
-      name: 'NutriBalance',
-      slug: 'nutribalance',
-      plan: 'free',
-    },
+    { name: 'Urban Cuts', slug: 'urban-cuts', plan: 'pro' as const },
+    { name: 'Clínica Vital', slug: 'clinica-vital', plan: 'pro' as const },
+    { name: 'NutriBalance', slug: 'nutribalance', plan: 'free' as const },
   ],
 
   users: [
-    // Urban Cuts
     {
       email: 'admin@urbancuts.com',
       password: '123456',
@@ -69,8 +23,20 @@ export const initialData: SeedData = {
       role: Role.staff,
       businessSlug: 'urban-cuts',
     },
-
-    // Clínica Vital
+    {
+      email: 'barber2@urbancuts.com',
+      password: '123456',
+      fullName: 'Nicolás Rivas',
+      role: Role.staff,
+      businessSlug: 'urban-cuts',
+    },
+    {
+      email: 'reception@urbancuts.com',
+      password: '123456',
+      fullName: 'Agustina Molina',
+      role: Role.staff,
+      businessSlug: 'urban-cuts',
+    },
     {
       email: 'admin@clinicavital.com',
       password: '123456',
@@ -79,14 +45,26 @@ export const initialData: SeedData = {
       businessSlug: 'clinica-vital',
     },
     {
-      email: 'recepcion@clinicavital.com',
+      email: 'medico1@clinicavital.com',
       password: '123456',
-      fullName: 'Carla Méndez',
+      fullName: 'Dr. Tomás Herrera',
       role: Role.staff,
       businessSlug: 'clinica-vital',
     },
-
-    // NutriBalance
+    {
+      email: 'kine@clinicavital.com',
+      password: '123456',
+      fullName: 'Lic. Camila Suárez',
+      role: Role.staff,
+      businessSlug: 'clinica-vital',
+    },
+    {
+      email: 'secretaria@clinicavital.com',
+      password: '123456',
+      fullName: 'Mariana Ponce',
+      role: Role.staff,
+      businessSlug: 'clinica-vital',
+    },
     {
       email: 'admin@nutribalance.com',
       password: '123456',
@@ -94,141 +72,349 @@ export const initialData: SeedData = {
       role: Role.admin,
       businessSlug: 'nutribalance',
     },
+    {
+      email: 'nutri1@nutribalance.com',
+      password: '123456',
+      fullName: 'Lic. Diego Benítez',
+      role: Role.staff,
+      businessSlug: 'nutribalance',
+    },
+    {
+      email: 'coach@nutribalance.com',
+      password: '123456',
+      fullName: 'Paula Acosta',
+      role: Role.staff,
+      businessSlug: 'nutribalance',
+    },
   ],
 
   clients: [
-    // Urban Cuts
-    {
-      fullName: 'Juan Pérez',
-      phone: '3415123456',
-      businessSlug: 'urban-cuts',
-    },
+    { fullName: 'Juan Pérez', phone: '3415123456', businessSlug: 'urban-cuts' },
     {
       fullName: 'Santiago López',
       phone: '3415987654',
       businessSlug: 'urban-cuts',
     },
     {
-      fullName: 'Nicolás Ríos',
-      phone: null,
+      fullName: 'Micaela Romero',
+      phone: '3415332211',
       businessSlug: 'urban-cuts',
     },
-
-    // Clínica Vital
+    {
+      fullName: 'Franco Díaz',
+      phone: '3415448899',
+      businessSlug: 'urban-cuts',
+    },
+    {
+      fullName: 'Lucía Navarro',
+      phone: '3415770011',
+      businessSlug: 'urban-cuts',
+    },
     {
       fullName: 'María González',
       phone: '3414001122',
       businessSlug: 'clinica-vital',
     },
     {
-      fullName: 'Ana Martínez',
-      phone: '3414778899',
+      fullName: 'Ricardo Sosa',
+      phone: '3414223344',
       businessSlug: 'clinica-vital',
     },
-
-    // NutriBalance
+    {
+      fullName: 'Valeria Campos',
+      phone: '3414556677',
+      businessSlug: 'clinica-vital',
+    },
+    {
+      fullName: 'Gonzalo Medina',
+      phone: '3414667788',
+      businessSlug: 'clinica-vital',
+    },
     {
       fullName: 'Carlos Sánchez',
       phone: '3415112233',
       businessSlug: 'nutribalance',
     },
     {
-      fullName: 'Lucía Herrera',
-      phone: '3415334455',
+      fullName: 'Melina Ferreyra',
+      phone: '3414889900',
       businessSlug: 'nutribalance',
     },
     {
-      fullName: 'Federico Molina',
-      phone: null,
+      fullName: 'Federico Ibarra',
+      phone: '3414991100',
+      businessSlug: 'nutribalance',
+    },
+    {
+      fullName: 'Rocío Prieto',
+      phone: '3414772200',
       businessSlug: 'nutribalance',
     },
   ],
 
   services: [
-    {
-      name: 'Corte',
-      duration: 30,
-      price: 5000,
-      businessSlug: 'urban-cuts',
-    },
-    {
-      name: 'Barba',
-      duration: 20,
-      price: 3000,
-      businessSlug: 'urban-cuts',
-    },
+    { name: 'Corte', price: 5000, duration: 30, businessSlug: 'urban-cuts' },
+    { name: 'Barba', price: 3000, duration: 20, businessSlug: 'urban-cuts' },
     {
       name: 'Corte + Barba',
-      duration: 45,
       price: 7500,
-      businessSlug: 'urban-cuts',
-    },
-    {
-      name: 'Perfilado de barba',
-      duration: 15,
-      price: 2500,
-      businessSlug: 'urban-cuts',
-    },
-    {
-      name: 'Lavado + Corte',
-      duration: 40,
-      price: 6500,
-      businessSlug: 'urban-cuts',
-    },
-    {
-      name: 'Corte premium',
       duration: 50,
-      price: 9000,
       businessSlug: 'urban-cuts',
     },
-
+    {
+      name: 'Afeitado clásico',
+      price: 4000,
+      duration: 30,
+      businessSlug: 'urban-cuts',
+    },
+    {
+      name: 'Consulta general',
+      price: 12000,
+      duration: 30,
+      businessSlug: 'clinica-vital',
+    },
+    {
+      name: 'Control clínico',
+      price: 10000,
+      duration: 20,
+      businessSlug: 'clinica-vital',
+    },
+    {
+      name: 'Kinesiología',
+      price: 14000,
+      duration: 45,
+      businessSlug: 'clinica-vital',
+    },
     {
       name: 'Consulta inicial',
-      duration: 60,
       price: 15000,
+      duration: 60,
       businessSlug: 'nutribalance',
     },
     {
       name: 'Seguimiento nutricional',
-      duration: 30,
-      price: 9000,
-      businessSlug: 'nutribalance',
-    },
-    {
-      name: 'Plan alimentario personalizado',
+      price: 12000,
       duration: 45,
-      price: 12000,
       businessSlug: 'nutribalance',
     },
     {
-      name: 'Control mensual',
-      duration: 30,
-      price: 8000,
-      businessSlug: 'nutribalance',
-    },
-    {
-      name: 'Consulta general',
-      duration: 30,
-      price: 12000,
-      businessSlug: 'clinica-vital',
-    },
-    {
-      name: 'Control médico',
-      duration: 20,
-      price: 9000,
-      businessSlug: 'clinica-vital',
-    },
-    {
-      name: 'Chequeo completo',
+      name: 'Plan de alimentación',
+      price: 18000,
       duration: 60,
-      price: 20000,
-      businessSlug: 'clinica-vital',
+      businessSlug: 'nutribalance',
+    },
+  ],
+
+  appointments: [
+    {
+      startAt: new Date('2025-04-10T10:00:00'),
+      endAt: new Date('2025-04-10T10:30:00'),
+      status: AppointmentStatus.PENDING,
+
+      businessSlug: 'urban-cuts',
+      clientName: 'Juan Pérez',
+      userEmail: 'barber@urbancuts.com',
+      serviceName: 'Corte',
     },
     {
-      name: 'Consulta especialista',
-      duration: 40,
-      price: 15000,
+      startAt: new Date('2025-04-10T10:30:00'),
+      endAt: new Date('2025-04-10T11:00:00'),
+      status: AppointmentStatus.COMPLETED,
+
+      businessSlug: 'urban-cuts',
+      clientName: 'Santiago López',
+      userEmail: 'barber@urbancuts.com',
+      serviceName: 'Barba',
+    },
+    {
+      startAt: new Date('2025-04-10T11:00:00'),
+      endAt: new Date('2025-04-10T11:50:00'),
+      status: AppointmentStatus.PENDING,
+      businessSlug: 'urban-cuts',
+      clientName: 'Micaela Romero',
+      userEmail: 'barber2@urbancuts.com',
+      serviceName: 'Corte + Barba',
+    },
+    {
+      startAt: new Date('2025-04-11T09:30:00'),
+      endAt: new Date('2025-04-11T10:00:00'),
+      status: AppointmentStatus.CANCELED,
+      businessSlug: 'urban-cuts',
+      clientName: 'Franco Díaz',
+      userEmail: 'barber2@urbancuts.com',
+      serviceName: 'Afeitado clásico',
+    },
+    {
+      startAt: new Date('2025-04-12T15:00:00'),
+      endAt: new Date('2025-04-12T15:30:00'),
+      status: AppointmentStatus.COMPLETED,
+      businessSlug: 'urban-cuts',
+      clientName: 'Lucía Navarro',
+      userEmail: 'barber@urbancuts.com',
+      serviceName: 'Corte',
+    },
+    {
+      startAt: new Date('2025-04-13T18:00:00'),
+      endAt: new Date('2025-04-13T18:20:00'),
+      status: AppointmentStatus.PENDING,
+      businessSlug: 'urban-cuts',
+      clientName: 'Juan Pérez',
+      userEmail: 'barber2@urbancuts.com',
+      serviceName: 'Barba',
+    },
+    {
+      startAt: new Date('2025-04-14T10:00:00'),
+      endAt: new Date('2025-04-14T10:50:00'),
+      status: AppointmentStatus.PENDING,
+      businessSlug: 'urban-cuts',
+      clientName: 'Santiago López',
+      userEmail: 'barber@urbancuts.com',
+      serviceName: 'Corte + Barba',
+    },
+    {
+      startAt: new Date('2025-04-15T12:00:00'),
+      endAt: new Date('2025-04-15T12:30:00'),
+      status: AppointmentStatus.CANCELED,
+      businessSlug: 'urban-cuts',
+      clientName: 'Micaela Romero',
+      userEmail: 'barber@urbancuts.com',
+      serviceName: 'Corte',
+    },
+    {
+      startAt: new Date('2025-04-16T09:00:00'),
+      endAt: new Date('2025-04-16T09:30:00'),
+      status: AppointmentStatus.COMPLETED,
+      businessSlug: 'urban-cuts',
+      clientName: 'Franco Díaz',
+      userEmail: 'barber2@urbancuts.com',
+      serviceName: 'Afeitado clásico',
+    },
+    {
+      startAt: new Date('2025-04-17T17:30:00'),
+      endAt: new Date('2025-04-17T18:00:00'),
+      status: AppointmentStatus.PENDING,
+      businessSlug: 'urban-cuts',
+      clientName: 'Lucía Navarro',
+      userEmail: 'barber@urbancuts.com',
+      serviceName: 'Corte',
+    },
+    {
+      startAt: new Date('2025-04-18T14:10:00'),
+      endAt: new Date('2025-04-18T14:30:00'),
+      status: AppointmentStatus.COMPLETED,
+      businessSlug: 'urban-cuts',
+      clientName: 'Juan Pérez',
+      userEmail: 'barber@urbancuts.com',
+      serviceName: 'Barba',
+    },
+    {
+      startAt: new Date('2025-04-19T10:30:00'),
+      endAt: new Date('2025-04-19T11:20:00'),
+      status: AppointmentStatus.PENDING,
+      businessSlug: 'urban-cuts',
+      clientName: 'Santiago López',
+      userEmail: 'barber2@urbancuts.com',
+      serviceName: 'Corte + Barba',
+    },
+    {
+      startAt: new Date('2025-04-20T16:00:00'),
+      endAt: new Date('2025-04-20T16:30:00'),
+      status: AppointmentStatus.CANCELED,
+      businessSlug: 'urban-cuts',
+      clientName: 'Lucía Navarro',
+      userEmail: 'barber2@urbancuts.com',
+      serviceName: 'Afeitado clásico',
+    },
+    {
+      startAt: new Date('2025-04-10T08:30:00'),
+      endAt: new Date('2025-04-10T09:00:00'),
+      status: AppointmentStatus.PENDING,
       businessSlug: 'clinica-vital',
+      clientName: 'María González',
+      userEmail: 'medico1@clinicavital.com',
+      serviceName: 'Consulta general',
+    },
+    {
+      startAt: new Date('2025-04-10T09:10:00'),
+      endAt: new Date('2025-04-10T09:30:00'),
+      status: AppointmentStatus.COMPLETED,
+      businessSlug: 'clinica-vital',
+      clientName: 'Ricardo Sosa',
+      userEmail: 'medico1@clinicavital.com',
+      serviceName: 'Control clínico',
+    },
+    {
+      startAt: new Date('2025-04-10T10:00:00'),
+      endAt: new Date('2025-04-10T10:45:00'),
+      status: AppointmentStatus.PENDING,
+      businessSlug: 'clinica-vital',
+      clientName: 'Valeria Campos',
+      userEmail: 'kine@clinicavital.com',
+      serviceName: 'Kinesiología',
+    },
+    {
+      startAt: new Date('2025-04-11T11:00:00'),
+      endAt: new Date('2025-04-11T11:30:00'),
+      status: AppointmentStatus.CANCELED,
+      businessSlug: 'clinica-vital',
+      clientName: 'Gonzalo Medina',
+      userEmail: 'medico1@clinicavital.com',
+      serviceName: 'Consulta general',
+    },
+    {
+      startAt: new Date('2025-04-12T12:40:00'),
+      endAt: new Date('2025-04-12T13:00:00'),
+      status: AppointmentStatus.PENDING,
+      businessSlug: 'clinica-vital',
+      clientName: 'María González',
+      userEmail: 'medico1@clinicavital.com',
+      serviceName: 'Control clínico',
+    },
+    {
+      startAt: new Date('2025-04-10T09:00:00'),
+      endAt: new Date('2025-04-10T10:00:00'),
+      status: AppointmentStatus.COMPLETED,
+
+      businessSlug: 'nutribalance',
+      clientName: 'Carlos Sánchez',
+      userEmail: 'admin@nutribalance.com',
+      serviceName: 'Consulta inicial',
+    },
+    {
+      startAt: new Date('2025-04-10T10:30:00'),
+      endAt: new Date('2025-04-10T11:15:00'),
+      status: AppointmentStatus.PENDING,
+      businessSlug: 'nutribalance',
+      clientName: 'Melina Ferreyra',
+      userEmail: 'nutri1@nutribalance.com',
+      serviceName: 'Seguimiento nutricional',
+    },
+    {
+      startAt: new Date('2025-04-11T09:00:00'),
+      endAt: new Date('2025-04-11T10:00:00'),
+      status: AppointmentStatus.CANCELED,
+      businessSlug: 'nutribalance',
+      clientName: 'Federico Ibarra',
+      userEmail: 'nutri1@nutribalance.com',
+      serviceName: 'Plan de alimentación',
+    },
+    {
+      startAt: new Date('2025-04-12T16:00:00'),
+      endAt: new Date('2025-04-12T16:45:00'),
+      status: AppointmentStatus.COMPLETED,
+      businessSlug: 'nutribalance',
+      clientName: 'Rocío Prieto',
+      userEmail: 'coach@nutribalance.com',
+      serviceName: 'Seguimiento nutricional',
+    },
+    {
+      startAt: new Date('2025-04-13T18:00:00'),
+      endAt: new Date('2025-04-13T19:00:00'),
+      status: AppointmentStatus.PENDING,
+      businessSlug: 'nutribalance',
+      clientName: 'Carlos Sánchez',
+      userEmail: 'admin@nutribalance.com',
+      serviceName: 'Consulta inicial',
     },
   ],
 };

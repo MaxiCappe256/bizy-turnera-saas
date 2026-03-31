@@ -11,10 +11,10 @@ import { SeedService } from './seed.service';
 
 @Controller('seed')
 export class SeedController {
-  constructor(private readonly seedService: SeedService) { }
+  constructor(private readonly seedService: SeedService) {}
 
   @Post()
   ruunSeed() {
-    return this.seedService.executedSeed();
+    return this.seedService.executeSeed();
   }
 }

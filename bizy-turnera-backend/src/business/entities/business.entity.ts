@@ -1,3 +1,4 @@
+import { Appointment } from 'src/appointments/entities/appointment.entity';
 import { User } from 'src/auth/entities/user.entity';
 import { Client } from 'src/clients/entities/client.entity';
 import { Service } from 'src/services/entities/service.entity';
@@ -26,28 +27,27 @@ export class Business {
   @Column({ default: 'free' })
   plan: 'free' | 'pro';
 
-  @OneToMany(() => User, (user) => user.business, {
-    onDelete: 'CASCADE',
-  })
-
   users: User[];
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @OneToMany(() => Client, (client) => client.business)
+  client: Client[];
+
+  @OneToMany(() => Service, (service) => service.business)
+  services: Service[];
+
+  @OneToMany(() => User, (user) => user.business, {
+    onDelete: 'CASCADE',
+  })
+  @OneToMany(() => Appointment, (appointment) => appointment.business)
+  appointments: Appointment[];
+
   @BeforeInsert()
   @BeforeUpdate()
   generateSlug() {
     this.slug = this.name.toLowerCase().trim().replace(/\s+/g, '-');
   }
-
-  @OneToMany(() => Client, (client) => client.business)
-  client: Client[];
-
-  @OneToMany(
-    () => Service,
-    (service) => service.business
-  )
-  services: Service[]
 }

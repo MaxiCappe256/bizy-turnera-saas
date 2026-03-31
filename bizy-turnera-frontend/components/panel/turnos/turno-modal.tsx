@@ -1,81 +1,107 @@
-"use client"
+"use client";
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { turnoSchema } from "@/schemas"
-import {  mockServicios } from "@/mock/data"
-import { Controller } from "react-hook-form"
+} from "@/components/ui/select";
+import { Controller } from "react-hook-form";
+import { Client, Service } from "@/schemas";
+import { useClients } from "@/hooks/panel/clients/useClients";
+import { useServices } from "@/hooks/panel/services/useServices";
+import { useCreateAppointment } from "@/hooks/panel/appointments/useCreateAppointment";
+import { useProfile } from "@/hooks/profile/useProfile";
+import { toast } from "sonner";
 
 type TurnoFormRaw = {
-  clienteId: string
-  servicioId: string
-  fecha: string
-  hora: string
-}
+  clienteId: string;
+  servicioId: string;
+  fecha: string;
+  hora: string;
+};
+
+const turnoFormSchema = z.object({
+  clienteId: z.string().min(1, "Seleccioná un cliente"),
+  servicioId: z.string().min(1, "Seleccioná un servicio"),
+  fecha: z.string().min(1, "Seleccioná una fecha"),
+  hora: z.string().min(1, "Seleccioná una hora"),
+});
 
 interface Props {
-  open: boolean
-  onClose: () => void
-  onGuardar: (data: {
-    clienteId: string
-    clienteNombre: string
-    servicioId: string
-    servicioNombre: string
-    fecha: string
-    hora: string
-  }) => void
+  open: boolean;
+  onClose: () => void;
 }
 
-export function TurnoModal({ open, onClose, onGuardar }: Props) {
+export function TurnoModal({ open, onClose }: Props) {
   const {
     register,
     handleSubmit,
     control,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<TurnoFormRaw>({
-    resolver: zodResolver(turnoSchema),
-  })
+    resolver: zodResolver(turnoFormSchema),
+  });
 
   const onSubmit = async (data: TurnoFormRaw) => {
-    await new Promise((r) => setTimeout(r, 400))
-    const cliente = mockClientes.find((c) => c.id === data.clienteId)
-    const servicio = mockServicios.find((s) => s.id === data.servicioId)
-    onGuardar({
-      ...data,
-      clienteNombre: cliente?.nombre ?? "",
-      servicioNombre: servicio?.nombre ?? "",
-    })
-    reset()
-    toast.success("Turno reservado correctamente")
-  }
+    const userId = profile?.id;
+    if (!userId) {
+      toast.error("No se pudo obtener el usuario actual");
+      return;
+    }
+
+    const startAt = new Date(`${data.fecha}T${data.hora}:00`).toISOString();
+    await createAppointment.mutateAsync({
+      clientId: data.clienteId,
+      serviceId: data.servicioId,
+      userId,
+      startAt,
+    });
+
+    reset();
+    onClose();
+  };
+
+  const { data: profile } = useProfile();
+  const createAppointment = useCreateAppointment();
+  const { data: clientes = [] } = useClients();
+  const { data: servicios = [] } = useServices();
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) { onClose(); reset() } }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) {
+          onClose();
+          reset();
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Reservar turno</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 py-2" noValidate>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-5 py-2"
+          noValidate
+        >
           {/* Cliente */}
           <div className="flex flex-col gap-1.5">
             <Label>Cliente</Label>
@@ -84,13 +110,15 @@ export function TurnoModal({ open, onClose, onGuardar }: Props) {
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className={errors.clienteId ? "border-destructive" : ""}>
+                  <SelectTrigger
+                    className={errors.clienteId ? "border-destructive" : ""}
+                  >
                     <SelectValue placeholder="Seleccioná un cliente" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockClientes.map((c) => (
+                    {clientes.map((c: Client) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.nombre}
+                        {c.fullName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -98,7 +126,9 @@ export function TurnoModal({ open, onClose, onGuardar }: Props) {
               )}
             />
             {errors.clienteId && (
-              <p className="text-xs text-destructive">{errors.clienteId.message}</p>
+              <p className="text-xs text-destructive">
+                {errors.clienteId.message}
+              </p>
             )}
           </div>
 
@@ -110,13 +140,16 @@ export function TurnoModal({ open, onClose, onGuardar }: Props) {
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className={errors.servicioId ? "border-destructive" : ""}>
+                  <SelectTrigger
+                    className={errors.servicioId ? "border-destructive" : ""}
+                  >
                     <SelectValue placeholder="Seleccioná un servicio" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockServicios.map((s) => (
+                    {servicios.map((s: Service) => (
                       <SelectItem key={s.id} value={s.id}>
-                        {s.nombre} — {s.duracionMinutos} min · ${s.precio.toLocaleString("es-AR")}
+                        {s.name} — {s.duration} min · $
+                        {s.price.toLocaleString("es-AR")}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -124,7 +157,9 @@ export function TurnoModal({ open, onClose, onGuardar }: Props) {
               )}
             />
             {errors.servicioId && (
-              <p className="text-xs text-destructive">{errors.servicioId.message}</p>
+              <p className="text-xs text-destructive">
+                {errors.servicioId.message}
+              </p>
             )}
           </div>
 
@@ -138,7 +173,11 @@ export function TurnoModal({ open, onClose, onGuardar }: Props) {
                 className={errors.fecha ? "border-destructive" : ""}
                 {...register("fecha")}
               />
-              {errors.fecha && <p className="text-xs text-destructive">{errors.fecha.message}</p>}
+              {errors.fecha && (
+                <p className="text-xs text-destructive">
+                  {errors.fecha.message}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="hora">Hora</Label>
@@ -148,20 +187,31 @@ export function TurnoModal({ open, onClose, onGuardar }: Props) {
                 className={errors.hora ? "border-destructive" : ""}
                 {...register("hora")}
               />
-              {errors.hora && <p className="text-xs text-destructive">{errors.hora.message}</p>}
+              {errors.hora && (
+                <p className="text-xs text-destructive">
+                  {errors.hora.message}
+                </p>
+              )}
             </div>
           </div>
 
           <DialogFooter className="pt-2">
-            <Button type="button" variant="outline" onClick={() => { onClose(); reset() }}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                onClose();
+                reset();
+              }}
+            >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Reservando..." : "Reservar turno"}
+            <Button type="submit" disabled={createAppointment.isPending}>
+              {createAppointment.isPending ? "Reservando..." : "Reservar turno"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

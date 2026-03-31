@@ -6,23 +6,23 @@ import { Business } from './entities/business.entity';
 
 @Controller('business')
 export class BusinessController {
-  constructor(private readonly businessService: BusinessService) { }
+  constructor(private readonly businessService: BusinessService) {}
 
   @Get()
-  findOne(@GetBusiness() business: Business) {
-    return this.businessService.findOne(business);
+  findOne(@GetBusiness() businessId: string) {
+    return this.businessService.findOne(businessId);
   }
 
   @Patch()
   update(
-    @GetBusiness() business: Business,
+    @GetBusiness() businessId: string,
     @Body() updateBusinessDto: UpdateBusinessDto,
   ) {
-    return this.businessService.update(business, updateBusinessDto);
+    return this.businessService.update(businessId, updateBusinessDto);
   }
 
   @Get('plan')
-  getPlan(@GetBusiness() business: Business) {
-    return this.businessService.getPlan(business);
+  getPlan(@GetBusiness() businessId: string) {
+    return this.businessService.getPlan(businessId);
   }
 }

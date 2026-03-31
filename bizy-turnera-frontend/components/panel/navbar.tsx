@@ -64,7 +64,7 @@ export function PanelNavbar() {
       <div className="flex items-center gap-3">
         <ThemeToggle />
 
-        <Button
+        {/* <Button
           variant="ghost"
           size="icon"
           className="relative"
@@ -75,7 +75,7 @@ export function PanelNavbar() {
             className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary"
             aria-hidden
           />
-        </Button>
+        </Button> */}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

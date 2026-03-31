@@ -21,7 +21,7 @@ import { Role } from './enums/role.enum';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('/register')
   register(@Body() registerDto: RegisterDto) {
@@ -34,8 +34,8 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('profile')
+  @Get('/me')
   getProfile(@GetUser() user, @GetBusiness() businessId) {
-    return this.authService.getProfile(user, businessId)
+    return this.authService.getProfile(user, businessId);
   }
 }

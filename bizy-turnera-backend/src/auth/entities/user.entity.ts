@@ -6,10 +6,12 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Role } from '../enums/role.enum';
+import { Appointment } from 'src/appointments/entities/appointment.entity';
 
 @Entity()
 export class User {
@@ -33,16 +35,20 @@ export class User {
   })
   role: Role;
 
-  @ManyToOne(() => Business, (business) => business.users, {
-    onDelete: 'CASCADE',
-  })
-  business: Business;
-
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => Business, (business) => business.users, {
+    onDelete: 'CASCADE',
+  })
+  business: Business;
+
+  @OneToMany(() => Appointment, (appointment) => appointment.user)
+  appointments: Appointment[];
+
 
   @BeforeInsert()
   @BeforeUpdate()

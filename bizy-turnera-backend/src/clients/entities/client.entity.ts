@@ -1,3 +1,4 @@
+import { Appointment } from 'src/appointments/entities/appointment.entity';
 import { Business } from 'src/business/entities/business.entity';
 import {
   Column,
@@ -33,4 +34,7 @@ export class Client {
     onDelete: 'CASCADE',
   })
   business: Business;
+
+  @OneToMany(() => Appointment, (appointment) => appointment.client)
+  appointments: Appointment[]
 }

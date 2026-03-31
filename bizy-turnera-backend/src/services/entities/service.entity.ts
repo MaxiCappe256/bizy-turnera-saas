@@ -1,5 +1,6 @@
+import { Appointment } from "src/appointments/entities/appointment.entity";
 import { Business } from "src/business/entities/business.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Service {
@@ -26,5 +27,8 @@ export class Service {
   }
   )
   business: Business
+
+  @OneToMany(() => Appointment, (appointment) => appointment.service)
+  appointments: Appointment[]
 
 }
