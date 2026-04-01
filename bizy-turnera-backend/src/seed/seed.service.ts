@@ -8,6 +8,8 @@ import { initialData } from './initial-data';
 import * as bcrypt from 'bcrypt';
 import { Service } from 'src/services/entities/service.entity';
 import { Appointment } from 'src/appointments/entities/appointment.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
+import { PaymentStatus } from 'src/payments/enums/payments.enum';
 
 @Injectable()
 export class SeedService {
@@ -26,6 +28,9 @@ export class SeedService {
 
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
+
+    @InjectRepository(Payment)
+    private readonly paymentRepository: Repository<Payment>,
   ) {}
 
   async executeSeed() {
@@ -101,10 +106,86 @@ export class SeedService {
       } as Appointment);
     }
 
+    // Payments (misma lógica de deuda que PaymentsService.create solo si status COMPLETED)
+    for (const paymentSeed of initialData.payments) {
+      const business = businesses.find(
+        (b) => b.slug === paymentSeed.businessSlug,
+      );
+      if (!business) continue;
+
+      const appointment = await this.findAppointmentForPaymentSeed(
+        business.id,
+        paymentSeed,
+      );
+
+      if (!appointment) {
+        throw new Error(
+          `Seed: no se encontró la cita para el pago (${paymentSeed.clientName}, ${paymentSeed.serviceName})`,
+        );
+      }
+
+      const existingPayment = await this.paymentRepository.findOne({
+        where: { appointment: { id: appointment.id } },
+      });
+      if (existingPayment) continue;
+
+      const amount = Number(appointment.service.price);
+
+      if (paymentSeed.status === PaymentStatus.COMPLETED) {
+        appointment.client.debt -= amount;
+        await this.clientRepository.save(appointment.client);
+      }
+
+      await this.paymentRepository.save({
+        amount,
+        method: paymentSeed.method,
+        status: paymentSeed.status,
+        description: paymentSeed.description,
+        paidAt: paymentSeed.paidAt,
+        canceledAt:
+          paymentSeed.status === PaymentStatus.CANCELED
+            ? paymentSeed.canceledAt
+            : undefined,
+        business: appointment.business,
+        appointment,
+        client: appointment.client,
+        user: appointment.user,
+      } as Payment);
+    }
+
     return 'Seed ejecutado correctamente';
   }
 
+  private async findAppointmentForPaymentSeed(
+    businessId: string,
+    paymentSeed: (typeof initialData.payments)[number],
+  ): Promise<Appointment | null> {
+    const appointments = await this.appointmentRepository.find({
+      where: { business: { id: businessId } },
+      relations: {
+        client: true,
+        user: true,
+        service: true,
+        business: true,
+      },
+    });
+
+    return (
+      appointments.find(
+        (a) =>
+          a.client.fullName === paymentSeed.clientName &&
+          a.user.email === paymentSeed.userEmail &&
+          a.service.name === paymentSeed.serviceName &&
+          Math.abs(a.startAt.getTime() - paymentSeed.startAt.getTime()) < 2000,
+      ) ?? null
+    );
+  }
+
   private async cleanDB() {
+    await this.paymentRepository.query(
+      `TRUNCATE TABLE "payment" RESTART IDENTITY CASCADE`,
+    );
+
     await this.appointmentRepository.query(
       `TRUNCATE TABLE "appointment" RESTART IDENTITY CASCADE`,
     );

@@ -113,8 +113,8 @@ export const appointmentSchema = z.object({
 
 export const pagoSchema = z.object({
   clienteId: z.string().min(1, "Seleccioná un cliente"),
-  monto: z.number().min(1),
-  metodo: z.enum(["efectivo", "transferencia"]),
+  amount: z.number().min(1),
+  method: z.enum(["efectivo", "transferencia"]),
   concepto: z.string().min(2),
 });
 

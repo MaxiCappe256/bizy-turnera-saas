@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -13,6 +14,7 @@ import { Client } from 'src/clients/entities/client.entity';
 import { User } from 'src/auth/entities/user.entity';
 
 import { Business } from 'src/business/entities/business.entity';
+import { PaymentStatus } from './enums/payments.enum';
 
 @Injectable()
 export class PaymentsService {
@@ -79,21 +81,60 @@ export class PaymentsService {
 
   findAll(
     businessId: string,
-    parsedLimit: number | undefined,
-    parsedOffset: number | undefined,
+    limit: number | undefined,
+    offset: number | undefined,
   ) {
-    return `This action returns all payments`;
+    return this.paymentRepository.find({
+      where: {
+        business: { id: businessId },
+      },
+      relations: {
+        user: true,
+        appointment: true,
+        client: true,
+      },
+      order: {
+        paidAt: 'DESC',
+      },
+      take: limit,
+      skip: offset,
+    });
   }
 
-  findOne(id: string, businessId: string) {
-    return `This action returns a #${id} payment`;
+  async cancel(id: string, businessId: string) {
+    return this.paymentRepository.manager.transaction(async (manager) => {
+      const payment = await manager.findOne(Payment, {
+        where: { id, business: { id: businessId } },
+        relations: {
+          client: true,
+        },
+      });
+
+      if (!payment) throw new NotFoundException('Payment not found');
+
+      if (payment.status === PaymentStatus.CANCELED)
+        throw new BadRequestException('Payment has already canceled');
+
+      payment.client.debt += payment.amount;
+
+      await manager.save(payment.client);
+
+      payment.status = PaymentStatus.CANCELED;
+      payment.canceledAt = new Date();
+
+      return manager.save(payment);
+    });
   }
 
-  update(id: string, updatePaymentDto: UpdatePaymentDto, businessId: string) {
-    return `This action updates a #${id} payment`;
-  }
+  // findOne(id: string, businessId: string) {
+  //   return `This action returns a #${id} payment`;
+  // }
 
-  remove(id: string, businessId: string) {
-    return `This action removes a #${id} payment`;
-  }
+  // update(id: string, updatePaymentDto: UpdatePaymentDto, businessId: string) {
+  //   return `This action updates a #${id} payment`;
+  // }
+
+  // remove(id: string, businessId: string) {
+  //   return `This action removes a #${id} payment`;
+  // }
 }

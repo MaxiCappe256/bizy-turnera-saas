@@ -1,35 +1,36 @@
-"use client"
+"use client";
 
-import { useForm, Controller } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { pagoSchema, type PagoFormData } from "@/schemas"
-import type { Pago } from "@/mock/data"
+} from "@/components/ui/select";
+import { Client, pagoSchema, type PagoFormData } from "@/schemas";
+import type { Pago } from "@/mock/data";
 
 interface Props {
-  open: boolean
-  onClose: () => void
-  onGuardar: (data: Omit<Pago, "id">) => void
+  open: boolean;
+  onClose: () => void;
+  // onGuardar: (data: Omit<Pago, "id">) => void
+  clientes: Client[];
 }
 
-export function PagoModal({ open, onClose, onGuardar }: Props) {
+export function PagoModal({ open, onClose, clientes }: Props) {
   const {
     register,
     handleSubmit,
@@ -38,31 +39,43 @@ export function PagoModal({ open, onClose, onGuardar }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<PagoFormData>({
     resolver: zodResolver(pagoSchema),
-  })
+  });
 
-  const onSubmit = async (data: PagoFormData) => {
-    await new Promise((r) => setTimeout(r, 400))
-    const cliente = mockClientes.find((c) => c.id === data.clienteId)
-    onGuardar({
-      clienteId: data.clienteId,
-      clienteNombre: cliente?.nombre ?? "",
-      monto: data.monto,
-      metodo: data.metodo,
-      concepto: data.concepto,
-      fecha: new Date().toISOString().split("T")[0],
-    })
-    reset()
-    toast.success("Pago registrado correctamente")
-  }
+  // const onSubmit = async (data: PagoFormData) => {
+  //   await new Promise((r) => setTimeout(r, 400));
+  //   const cliente = clientes.find((c: Client) => c.id === data.clienteId);
+  //   onGuardar({
+  //     clienteId: data.clienteId,
+  //     clienteNombre: cliente?.fullName ?? "",
+  //     monto: data.amount,
+  //     metodo: data.method,
+  //     concepto: data.concepto,
+  //     fecha: new Date().toISOString().split("T")[0],
+  //   });
+  //   reset();
+  // toast.success("Pago registrado correctamente");
+  // };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) { onClose(); reset() } }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) {
+          onClose();
+          reset();
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Registrar pago</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 py-2" noValidate>
+        <form
+          // onSubmit={//handleSubmit(onSubmit)}
+          className="flex flex-col gap-5 py-2"
+          noValidate
+        >
           {/* Cliente */}
           <div className="flex flex-col gap-1.5">
             <Label>Cliente</Label>
@@ -71,18 +84,26 @@ export function PagoModal({ open, onClose, onGuardar }: Props) {
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className={errors.clienteId ? "border-destructive" : ""}>
+                  <SelectTrigger
+                    className={errors.clienteId ? "border-destructive" : ""}
+                  >
                     <SelectValue placeholder="Seleccioná un cliente" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockClientes.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                    {clientes.map((c: Client) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.fullName}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
             />
-            {errors.clienteId && <p className="text-xs text-destructive">{errors.clienteId.message}</p>}
+            {errors.clienteId && (
+              <p className="text-xs text-destructive">
+                {errors.clienteId.message}
+              </p>
+            )}
           </div>
 
           {/* Concepto */}
@@ -94,7 +115,11 @@ export function PagoModal({ open, onClose, onGuardar }: Props) {
               className={errors.concepto ? "border-destructive" : ""}
               {...register("concepto")}
             />
-            {errors.concepto && <p className="text-xs text-destructive">{errors.concepto.message}</p>}
+            {errors.concepto && (
+              <p className="text-xs text-destructive">
+                {errors.concepto.message}
+              </p>
+            )}
           </div>
 
           {/* Monto y método */}
@@ -105,35 +130,54 @@ export function PagoModal({ open, onClose, onGuardar }: Props) {
                 id="monto"
                 type="number"
                 placeholder="2500"
-                className={errors.monto ? "border-destructive" : ""}
-                {...register("monto", { valueAsNumber: true })}
+                className={errors.amount ? "border-destructive" : ""}
+                {...register("amount", { valueAsNumber: true })}
               />
-              {errors.monto && <p className="text-xs text-destructive">{errors.monto.message}</p>}
+              {errors.amount && (
+                <p className="text-xs text-destructive">
+                  {errors.amount.message}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
               <Label>Método de pago</Label>
               <Controller
-                name="metodo"
+                name="method"
                 control={control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className={errors.metodo ? "border-destructive" : ""}>
+                    <SelectTrigger
+                      className={errors.method ? "border-destructive" : ""}
+                    >
                       <SelectValue placeholder="Seleccioná" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="efectivo">Efectivo</SelectItem>
-                      <SelectItem value="transferencia">Transferencia</SelectItem>
+                      <SelectItem value="transferencia">
+                        Transferencia
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
-              {errors.metodo && <p className="text-xs text-destructive">{errors.metodo.message}</p>}
+              {errors.method && (
+                <p className="text-xs text-destructive">
+                  {errors.method.message}
+                </p>
+              )}
             </div>
           </div>
 
           <DialogFooter className="pt-2">
-            <Button type="button" variant="outline" onClick={() => { onClose(); reset() }}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                onClose();
+                reset();
+              }}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -143,5 +187,5 @@ export function PagoModal({ open, onClose, onGuardar }: Props) {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

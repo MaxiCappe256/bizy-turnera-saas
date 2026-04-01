@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { PaymentMethod } from '../enums/payments.enum';
+import { PaymentMethod, PaymentStatus } from '../enums/payments.enum';
 import { Client } from 'src/clients/entities/client.entity';
 import { User } from 'src/auth/entities/user.entity';
 import { Appointment } from 'src/appointments/entities/appointment.entity';
@@ -22,11 +22,21 @@ export class Payment {
   @Column({ type: 'enum', enum: PaymentMethod })
   method: PaymentMethod;
 
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.COMPLETED,
+  })
+  status: PaymentStatus;
+
   @Column({ type: 'text' })
   description: string;
 
   @CreateDateColumn()
   paidAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  canceledAt?: Date;
 
   @ManyToOne(() => Business)
   business: Business;

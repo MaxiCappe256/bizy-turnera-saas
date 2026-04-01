@@ -100,12 +100,8 @@ export class AppointmentsService {
       order: {
         startAt: 'ASC',
       },
-      ...(typeof limit === 'number' && Number.isFinite(limit)
-        ? { take: limit }
-        : {}),
-      ...(typeof offset === 'number' && Number.isFinite(offset)
-        ? { skip: offset }
-        : {}),
+      take: limit,
+      skip: offset,
     });
   }
 

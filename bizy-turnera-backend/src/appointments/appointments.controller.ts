@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
@@ -31,13 +32,10 @@ export class AppointmentsController {
   @Get()
   findAll(
     @GetBusiness() businessId: string,
-    @Query('limit') limit?: string,
-    @Query('offset') offset?: string,
+    @Query('limit', ParseIntPipe) limit?: number,
+    @Query('offset', ParseIntPipe) offset?: number,
   ) {
-    const parsedLimit = limit !== undefined ? Number(limit) : undefined;
-    const parsedOffset = offset !== undefined ? Number(offset) : undefined;
-
-    return this.appointmentsService.findAll(businessId, parsedLimit, parsedOffset);
+    return this.appointmentsService.findAll(businessId, limit, offset);
   }
 
   @Get(':id')

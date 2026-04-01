@@ -1,31 +1,36 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Plus, CreditCard, Banknote, ArrowRightLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { mockPagos } from "@/mock/data"
-import type { Pago } from "@/mock/data"
-import { PagoModal } from "@/components/panel/pagos/pago-modal"
+import { useState } from "react";
+import { Plus, CreditCard, Banknote, ArrowRightLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { PagoModal } from "@/components/panel/pagos/pago-modal";
+import { usePayments } from "@/hooks/panel/payments/usePayments";
+import { useClients } from "@/hooks/panel/clients/useClients";
 
 export default function PagosPage() {
-  const [pagos, setPagos] = useState(mockPagos)
-  const [modalOpen, setModalOpen] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false);
 
-  function handleCrear(data: Omit<Pago, "id">) {
-    const nuevo: Pago = { id: `p${Date.now()}`, ...data }
-    setPagos((prev) => [nuevo, ...prev])
-    setModalOpen(false)
-  }
+  const { data: pagos = [] } = usePayments();
+  const { data: clientes = [] } = useClients();
+
+  console.log(pagos);
+
+  // function handleCrear(data: Omit<Pago, "id">) {
+  //   const nuevo: Pago = { id: `p${Date.now()}`, ...data };
+  //   setPagos((prev) => [nuevo, ...prev]);
+  //   setModalOpen(false);
+  // }
 
   const totalEfectivo = pagos
-    .filter((p) => p.metodo === "efectivo")
-    .reduce((sum, p) => sum + p.monto, 0)
+    .filter((p: any) => p.metodo === "efectivo")
+    .reduce((sum: any, p: any) => sum + p.monto, 0);
   const totalTransferencia = pagos
-    .filter((p) => p.metodo === "transferencia")
-    .reduce((sum, p) => sum + p.monto, 0)
-  const totalGeneral = pagos.reduce((sum, p) => sum + p.monto, 0)
+    .filter((p: any) => p.metodo === "transferencia")
+    .reduce((sum: any, p: any) => sum + p.monto, 0);
+  const totalGeneral = pagos.reduce((sum: any, p: any) => sum + p.monto, 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -37,7 +42,10 @@ export default function PagosPage() {
             {pagos.length} transacciones registradas
           </p>
         </div>
-        <Button onClick={() => setModalOpen(true)} className="gap-2 self-start sm:self-auto">
+        <Button
+          onClick={() => setModalOpen(true)}
+          className="gap-2 self-start sm:self-auto"
+        >
           <Plus className="h-4 w-4" />
           Registrar pago
         </Button>
@@ -99,40 +107,61 @@ export default function PagosPage() {
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
               <CreditCard className="h-6 w-6 text-muted-foreground" />
             </div>
-            <h3 className="text-base font-medium text-foreground">No hay pagos registrados</h3>
+            <h3 className="text-base font-medium text-foreground">
+              No hay pagos registrados
+            </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Registrá los pagos de tus clientes para llevar un control de ingresos.
+              Registrá los pagos de tus clientes para llevar un control de
+              ingresos.
             </p>
           </CardContent>
         </Card>
       ) : (
         <Card className="border border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Historial de transacciones</CardTitle>
+            <CardTitle className="text-base font-semibold">
+              Historial de transacciones
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Cliente</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Concepto</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Fecha</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">Método</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground">Monto</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
+                      Cliente
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
+                      Concepto
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
+                      Fecha
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
+                      Método
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground">
+                      Monto
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {pagos.map((pago) => (
+                  {pagos.map((pago: any) => (
                     <tr
                       key={pago.id}
                       className="border-b border-border last:border-0 transition-colors hover:bg-muted/30"
                     >
-                      <td className="px-6 py-4 font-medium text-foreground">{pago.clienteNombre}</td>
-                      <td className="px-6 py-4 text-muted-foreground">{pago.concepto}</td>
-                      <td className="px-6 py-4 text-muted-foreground">{pago.fecha}</td>
+                      <td className="px-6 py-4 font-medium text-foreground">
+                        {pago.client.fullName}
+                      </td>
+                      <td className="px-6 py-4 text-muted-foreground">
+                        {pago.concepto}
+                      </td>
+                      <td className="px-6 py-4 text-muted-foreground">
+                        {pago.paidAt}
+                      </td>
                       <td className="px-6 py-4">
-                        {pago.metodo === "efectivo" ? (
+                        {pago.method === "cash" ? (
                           <Badge
                             variant="outline"
                             className="rounded-full bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 text-xs gap-1"
@@ -151,7 +180,7 @@ export default function PagosPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-right font-semibold text-foreground">
-                        ${pago.monto.toLocaleString("es-AR")}
+                        ${pago.amount.toLocaleString("es-AR")}
                       </td>
                     </tr>
                   ))}
@@ -165,8 +194,9 @@ export default function PagosPage() {
       <PagoModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onGuardar={handleCrear}
+        // onGuardar={handleCrear}
+        clientes={clientes}
       />
     </div>
-  )
+  );
 }
