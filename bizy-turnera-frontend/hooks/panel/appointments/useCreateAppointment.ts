@@ -13,7 +13,7 @@ export function useCreateAppointment() {
     },
     onSuccess: () => {
       toast.success("Turno creado correctamente");
-      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["appointments"], exact: false });
     },
     onError: (error: any) => {
       const message = error.response?.data?.message || "Error al crear el turno";

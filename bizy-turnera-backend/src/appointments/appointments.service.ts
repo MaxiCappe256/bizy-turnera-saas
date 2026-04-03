@@ -26,7 +26,7 @@ export class AppointmentsService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(createAppointmentDto: CreateAppointmentDto, businessId: string) {
     const { clientId, serviceId, userId, startAt, notes } =
@@ -87,7 +87,33 @@ export class AppointmentsService {
     return this.appointmentRepository.save(appointment);
   }
 
-  findAll(businessId: string, limit?: number, offset?: number) {
+  findAll(
+    businessId: string,
+    pendingPayment?: string,
+    limit?: number,
+    offset?: number,
+  ) {
+    // La FK del OneToOne está en la tabla `payments`; `payment: IsNull()` en find() no aplica bien.
+    if (pendingPayment === 'true') {
+      const qb = this.appointmentRepository
+        .createQueryBuilder('appointment')
+        .leftJoinAndSelect('appointment.client', 'client')
+        .leftJoinAndSelect('appointment.service', 'service')
+        .leftJoinAndSelect('appointment.user', 'user')
+        .leftJoin('appointment.payment', 'payment')
+        .where('appointment.businessId = :businessId', { businessId })
+        .andWhere('appointment.status = :status', {
+          status: AppointmentStatus.PENDING,
+        })
+        .andWhere('payment.id IS NULL')
+        .orderBy('appointment.startAt', 'ASC');
+
+      if (limit !== undefined) qb.take(limit);
+      if (offset !== undefined) qb.skip(offset);
+
+      return qb.getMany();
+    }
+
     return this.appointmentRepository.find({
       where: {
         business: { id: businessId },
@@ -100,8 +126,8 @@ export class AppointmentsService {
       order: {
         startAt: 'ASC',
       },
-      take: limit,
-      skip: offset,
+      ...(limit !== undefined ? { take: limit } : {}),
+      ...(offset !== undefined ? { skip: offset } : {}),
     });
   }
 
@@ -191,11 +217,4 @@ export class AppointmentsService {
     return this.appointmentRepository.save(appointment);
   }
 
-  async remove(id: string, businessId: string) {
-    const appointment = await this.findOne(id, businessId);
-
-    await this.appointmentRepository.remove(appointment);
-
-    return 'Appointment deleted successfully';
-  }
 }

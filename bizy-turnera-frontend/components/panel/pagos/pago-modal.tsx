@@ -1,60 +1,65 @@
-"use client";
+'use client';
 
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Client, pagoSchema, type PagoFormData } from "@/schemas";
-import type { Pago } from "@/mock/data";
+} from '@/components/ui/select';
+
+import {
+  pagoSchema,
+  type PagoFormData,
+  type Appointment,
+  type Client,
+} from '@/schemas';
+
+import { format } from 'date-fns';
+import { useState } from 'react';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  // onGuardar: (data: Omit<Pago, "id">) => void
+  appointments: Appointment[];
+  onSubmit: (data: PagoFormData) => void;
   clientes: Client[];
 }
 
-export function PagoModal({ open, onClose, clientes }: Props) {
+export function PagoModal({
+  open,
+  onClose,
+  appointments,
+  onSubmit,
+  clientes,
+}: Props) {
   const {
-    register,
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<PagoFormData>({
     resolver: zodResolver(pagoSchema),
   });
 
-  // const onSubmit = async (data: PagoFormData) => {
-  //   await new Promise((r) => setTimeout(r, 400));
-  //   const cliente = clientes.find((c: Client) => c.id === data.clienteId);
-  //   onGuardar({
-  //     clienteId: data.clienteId,
-  //     clienteNombre: cliente?.fullName ?? "",
-  //     monto: data.amount,
-  //     metodo: data.method,
-  //     concepto: data.concepto,
-  //     fecha: new Date().toISOString().split("T")[0],
-  //   });
-  //   reset();
-  // toast.success("Pago registrado correctamente");
-  // };
+  const [search, setSearch] = useState('');
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+
+  const filteredClients = clientes.filter((c) =>
+    c.fullName.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <Dialog
@@ -63,6 +68,8 @@ export function PagoModal({ open, onClose, clientes }: Props) {
         if (!v) {
           onClose();
           reset();
+          setSelectedClient(null);
+          setSearch('');
         }
       }}
     >
@@ -71,102 +78,125 @@ export function PagoModal({ open, onClose, clientes }: Props) {
           <DialogTitle>Registrar pago</DialogTitle>
         </DialogHeader>
 
+        {/* Buscar cliente */}
+        {/* <div className="flex flex-col gap-2">
+          <Label>Cliente</Label>
+
+          <input
+            type="text"
+            placeholder="Buscar cliente..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="px-3 py-2 bg-slate-800 rounded-md"
+          />
+
+          {!selectedClient && (
+            <div className="max-h-40 overflow-y-auto border rounded-md">
+              {filteredClients.slice(0, 10).map((c) => (
+                <div
+                  key={c.id}
+                  onClick={() => {
+                    setSelectedClient(c);
+                    setValue('clientId', c.id); // guarda en el form
+                  }}
+                  className="cursor-pointer px-3 py-2 hover:bg-slate-700"
+                >
+                  {c.fullName}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {selectedClient && (
+            <div className="text-sm bg-slate-800 px-3 py-2 rounded-md flex justify-between">
+              {selectedClient.fullName}
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedClient(null);
+                  setValue('clientId', '');
+                }}
+                className="text-red-400"
+              >
+                Cambiar
+              </button>
+            </div>
+          )}
+        </div> */}
+
         <form
-          // onSubmit={//handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(async (data) => {
+            await Promise.resolve(onSubmit(data));
+            reset();
+            setSelectedClient(null);
+            setSearch('');
+          })}
           className="flex flex-col gap-5 py-2"
           noValidate
         >
-          {/* Cliente */}
+          {/* Turno */}
           <div className="flex flex-col gap-1.5">
-            <Label>Cliente</Label>
+            <Label>Turno</Label>
+
             <Controller
-              name="clienteId"
+              name="appointmentId"
               control={control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger
-                    className={errors.clienteId ? "border-destructive" : ""}
+                    className={errors.appointmentId ? 'border-destructive' : ''}
                   >
-                    <SelectValue placeholder="Seleccioná un cliente" />
+                    <SelectValue placeholder="Seleccioná un turno" />
                   </SelectTrigger>
+
                   <SelectContent>
-                    {clientes.map((c: Client) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.fullName}
+                    {appointments.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.client.fullName} · {a.service.name} ·{' '}
+                        {format(new Date(a.startAt), 'dd/MM HH:mm')}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
             />
-            {errors.clienteId && (
+
+            {errors.appointmentId && (
               <p className="text-xs text-destructive">
-                {errors.clienteId.message}
+                {errors.appointmentId.message}
               </p>
             )}
           </div>
 
-          {/* Concepto */}
+          {/* Método */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="concepto">Concepto</Label>
-            <Input
-              id="concepto"
-              placeholder="Corte de cabello"
-              className={errors.concepto ? "border-destructive" : ""}
-              {...register("concepto")}
+            <Label>Método de pago</Label>
+
+            <Controller
+              name="method"
+              control={control}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger
+                    className={errors.method ? 'border-destructive' : ''}
+                  >
+                    <SelectValue placeholder="Seleccioná" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="cash">Efectivo</SelectItem>
+                    <SelectItem value="transfer">Transferencia</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             />
-            {errors.concepto && (
+
+            {errors.method && (
               <p className="text-xs text-destructive">
-                {errors.concepto.message}
+                {errors.method.message}
               </p>
             )}
-          </div>
-
-          {/* Monto y método */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="monto">Monto ($)</Label>
-              <Input
-                id="monto"
-                type="number"
-                placeholder="2500"
-                className={errors.amount ? "border-destructive" : ""}
-                {...register("amount", { valueAsNumber: true })}
-              />
-              {errors.amount && (
-                <p className="text-xs text-destructive">
-                  {errors.amount.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label>Método de pago</Label>
-              <Controller
-                name="method"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger
-                      className={errors.method ? "border-destructive" : ""}
-                    >
-                      <SelectValue placeholder="Seleccioná" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="efectivo">Efectivo</SelectItem>
-                      <SelectItem value="transferencia">
-                        Transferencia
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.method && (
-                <p className="text-xs text-destructive">
-                  {errors.method.message}
-                </p>
-              )}
-            </div>
           </div>
 
           <DialogFooter className="pt-2">
@@ -176,12 +206,15 @@ export function PagoModal({ open, onClose, clientes }: Props) {
               onClick={() => {
                 onClose();
                 reset();
+                setSelectedClient(null);
+                setSearch('');
               }}
             >
               Cancelar
             </Button>
+
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Registrando..." : "Registrar pago"}
+              {isSubmitting ? 'Registrando...' : 'Registrar pago'}
             </Button>
           </DialogFooter>
         </form>

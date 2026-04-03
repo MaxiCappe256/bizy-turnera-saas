@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Post,
@@ -8,7 +9,6 @@ import {
   Delete,
   UseGuards,
   Query,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
@@ -19,7 +19,7 @@ import { GetBusiness } from 'src/auth/decorators/get-business.decorator';
 @UseGuards(AuthGuard('jwt'))
 @Controller('/appointments')
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) {}
+  constructor(private readonly appointmentsService: AppointmentsService) { }
 
   @Post()
   create(
@@ -32,10 +32,30 @@ export class AppointmentsController {
   @Get()
   findAll(
     @GetBusiness() businessId: string,
-    @Query('limit', ParseIntPipe) limit?: number,
-    @Query('offset', ParseIntPipe) offset?: number,
+    @Query('pendingPayment') pendingPayment?: string,
+    @Query('limit') limitStr?: string,
+    @Query('offset') offsetStr?: string,
   ) {
-    return this.appointmentsService.findAll(businessId, limit, offset);
+    let limit: number | undefined;
+    let offset: number | undefined;
+
+    if (limitStr !== undefined && limitStr !== '') {
+      const n = Number.parseInt(limitStr, 10);
+      if (Number.isNaN(n) || n < 1) {
+        throw new BadRequestException('limit must be a positive integer');
+      }
+      limit = n;
+    }
+
+    if (offsetStr !== undefined && offsetStr !== '') {
+      const n = Number.parseInt(offsetStr, 10);
+      if (Number.isNaN(n) || n < 0) {
+        throw new BadRequestException('offset must be a non-negative integer');
+      }
+      offset = n;
+    }
+
+    return this.appointmentsService.findAll(businessId, pendingPayment, limit, offset);
   }
 
   @Get(':id')
@@ -56,8 +76,5 @@ export class AppointmentsController {
     );
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string, @GetBusiness() businessId: string) {
-    return this.appointmentsService.remove(id, businessId);
-  }
+
 }

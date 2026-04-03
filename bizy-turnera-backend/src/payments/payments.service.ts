@@ -14,7 +14,8 @@ import { Client } from 'src/clients/entities/client.entity';
 import { User } from 'src/auth/entities/user.entity';
 
 import { Business } from 'src/business/entities/business.entity';
-import { PaymentStatus } from './enums/payments.enum';
+import { PaymentMethod, PaymentStatus } from './enums/payments.enum';
+import { AppointmentStatus } from 'src/appointments/enums/appointment-status.enum';
 
 @Injectable()
 export class PaymentsService {
@@ -27,7 +28,45 @@ export class PaymentsService {
     private readonly clientRepository: Repository<Client>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
+
+  async getStats(businessId: string) {
+    const payments = await this.paymentRepository.find({
+      where: {
+        business: { id: businessId },
+        status: PaymentStatus.COMPLETED,
+      },
+    });
+
+    const cashPayments = payments.filter(
+      (payment) => payment.method === PaymentMethod.CASH,
+    );
+
+    const transferPayments = payments.filter(
+      (payment) => payment.method === PaymentMethod.TRANSFER,
+    );
+
+    const total = payments.reduce(
+      (sum, payment) => sum + Number(payment.amount),
+      0,
+    );
+
+    const cash = cashPayments.reduce(
+      (sum, payment) => sum + Number(payment.amount),
+      0,
+    );
+
+    const transfer = transferPayments.reduce(
+      (sum, payment) => sum + Number(payment.amount),
+      0,
+    );
+
+    return {
+      total,
+      cash,
+      transfer,
+    };
+  }
 
   async create(createPaymentDto: CreatePaymentDto, businessId: string) {
     const { appointmentId, method } = createPaymentDto;
@@ -50,6 +89,8 @@ export class PaymentsService {
 
       if (!appointment) throw new NotFoundException('Appointment not found');
 
+      if (appointment.status === AppointmentStatus.CANCELED) throw new BadRequestException("Cannot pay a canceled appointment")
+
       const existingPayment = await manager.findOne(Payment, {
         where: {
           appointment: {
@@ -61,7 +102,13 @@ export class PaymentsService {
       if (existingPayment)
         throw new ConflictException('Payment already exists');
 
+      if (appointment.status !== AppointmentStatus.COMPLETED) {
+        appointment.status = AppointmentStatus.COMPLETED
+      }
+
       appointment.client.debt -= appointment.service.price;
+
+      await manager.save(appointment)
       await manager.save(appointment.client);
 
       const payment = manager.create(Payment, {

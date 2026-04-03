@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/auth/entities/user.entity';
 import { Business } from 'src/business/entities/business.entity';
@@ -31,7 +31,7 @@ export class SeedService {
 
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
-  ) {}
+  ) { }
 
   async executeSeed() {
     await this.cleanDB();
@@ -94,6 +94,14 @@ export class SeedService {
       const service = await this.serviceRepository.findOne({
         where: { name: appointment.serviceName },
       });
+
+      if (!client || !service) {
+        throw new Error('Seed error: client or service not found');
+      }
+
+      client.debt = Number(client.debt) + Number(service.price)
+
+      await this.clientRepository.save(client)
 
       await this.appointmentRepository.save({
         startAt: appointment.startAt,

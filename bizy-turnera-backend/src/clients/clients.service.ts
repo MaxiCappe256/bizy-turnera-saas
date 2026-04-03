@@ -43,7 +43,7 @@ export class ClientsService {
           fullName: ILike(`%${term}%`),
           business: { id: businessId },
         },
-        order: { fullName: 'ASC' },
+        order: { createdAt: 'DESC' },
         take: limit,
         skip: offset,
       });

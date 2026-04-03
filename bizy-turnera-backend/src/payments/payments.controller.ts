@@ -21,6 +21,11 @@ import { GetBusiness } from 'src/auth/decorators/get-business.decorator';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
+  @Get('stats')
+  getStats(@GetBusiness() businessId: string) {
+    return this.paymentsService.getStats(businessId)
+  }
+
   @Post()
   create(
     @Body() createPaymentDto: CreatePaymentDto,

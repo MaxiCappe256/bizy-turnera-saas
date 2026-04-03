@@ -1,36 +1,43 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Plus, CreditCard, Banknote, ArrowRightLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from 'react';
+import {
+  Plus,
+  CreditCard,
+  Banknote,
+  ArrowRightLeft,
+  Loader,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { PagoModal } from "@/components/panel/pagos/pago-modal";
-import { usePayments } from "@/hooks/panel/payments/usePayments";
-import { useClients } from "@/hooks/panel/clients/useClients";
+import { PagoModal } from '@/components/panel/pagos/pago-modal';
+import { usePayments } from '@/hooks/panel/payments/usePayments';
+import { format } from 'date-fns';
+import { usePaymentCreate } from '@/hooks/panel/payments/usePaymentCreate';
+import { useAppointments } from '@/hooks/panel/appointments/useAppointments';
+import { PagoFormData } from '@/schemas';
+import { useClients } from '@/hooks/panel/clients/useClients';
+import { usePaymentsStats } from '@/hooks/panel/payments/usePaymentsStats';
 
 export default function PagosPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
   const { data: pagos = [] } = usePayments();
+  const { mutate: crearPago } = usePaymentCreate();
+  const { appointments = [] } = useAppointments(undefined, undefined, true);
   const { data: clientes = [] } = useClients();
+  const { data: stats, isLoading } = usePaymentsStats();
 
-  console.log(pagos);
+  console.log('stats', stats);
 
-  // function handleCrear(data: Omit<Pago, "id">) {
-  //   const nuevo: Pago = { id: `p${Date.now()}`, ...data };
-  //   setPagos((prev) => [nuevo, ...prev]);
-  //   setModalOpen(false);
-  // }
+  function handleCrear(data: PagoFormData) {
+    crearPago(data);
+    setModalOpen(false);
+  }
 
-  const totalEfectivo = pagos
-    .filter((p: any) => p.metodo === "efectivo")
-    .reduce((sum: any, p: any) => sum + p.monto, 0);
-  const totalTransferencia = pagos
-    .filter((p: any) => p.metodo === "transferencia")
-    .reduce((sum: any, p: any) => sum + p.monto, 0);
-  const totalGeneral = pagos.reduce((sum: any, p: any) => sum + p.monto, 0);
+  if (isLoading) return <Loader />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -62,7 +69,7 @@ export default function PagosPage() {
               <div>
                 <p className="text-xs text-muted-foreground">Total recaudado</p>
                 <p className="text-lg font-bold text-foreground">
-                  ${totalGeneral.toLocaleString("es-AR")}
+                  ${stats.total.toLocaleString('es-AR')}
                 </p>
               </div>
             </div>
@@ -77,7 +84,7 @@ export default function PagosPage() {
               <div>
                 <p className="text-xs text-muted-foreground">Efectivo</p>
                 <p className="text-lg font-bold text-foreground">
-                  ${totalEfectivo.toLocaleString("es-AR")}
+                  ${stats.cash.toLocaleString('es-AR')}
                 </p>
               </div>
             </div>
@@ -92,7 +99,7 @@ export default function PagosPage() {
               <div>
                 <p className="text-xs text-muted-foreground">Transferencia</p>
                 <p className="text-lg font-bold text-foreground">
-                  ${totalTransferencia.toLocaleString("es-AR")}
+                  ${stats.transfer.toLocaleString('es-AR')}
                 </p>
               </div>
             </div>
@@ -135,7 +142,7 @@ export default function PagosPage() {
                       Concepto
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
-                      Fecha
+                      Fecha y hora
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                       Método
@@ -155,13 +162,13 @@ export default function PagosPage() {
                         {pago.client.fullName}
                       </td>
                       <td className="px-6 py-4 text-muted-foreground">
-                        {pago.concepto}
+                        {pago.description}
                       </td>
                       <td className="px-6 py-4 text-muted-foreground">
-                        {pago.paidAt}
+                        {format(new Date(pago.paidAt), 'dd/MM/yyyy - HH:mm')}
                       </td>
                       <td className="px-6 py-4">
-                        {pago.method === "cash" ? (
+                        {pago.method === 'cash' ? (
                           <Badge
                             variant="outline"
                             className="rounded-full bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800 text-xs gap-1"
@@ -180,7 +187,7 @@ export default function PagosPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-right font-semibold text-foreground">
-                        ${pago.amount.toLocaleString("es-AR")}
+                        ${pago.amount.toLocaleString('es-AR')}
                       </td>
                     </tr>
                   ))}
@@ -194,7 +201,8 @@ export default function PagosPage() {
       <PagoModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        // onGuardar={handleCrear}
+        appointments={appointments}
+        onSubmit={handleCrear}
         clientes={clientes}
       />
     </div>

@@ -111,11 +111,35 @@ export const appointmentSchema = z.object({
    PAYMENTS
 ========================= */
 
+export const paymentMethodSchema = z.enum(["cash", "transfer"]);
+export const paymentStatusSchema = z.enum(["completed", "canceled"]);
+
+/* FORM (crear pago) */
 export const pagoSchema = z.object({
-  clienteId: z.string().min(1, "Seleccioná un cliente"),
-  amount: z.number().min(1),
-  method: z.enum(["efectivo", "transferencia"]),
-  concepto: z.string().min(2),
+  appointmentId: z.string().uuid("Seleccioná un turno válido"),
+  method: paymentMethodSchema,
+});
+
+/* RESPONSE (mostrar pago) */
+export const paymentSchema = z.object({
+  id: z.string(),
+  amount: z.number(),
+  method: paymentMethodSchema,
+  status: paymentStatusSchema,
+  description: z.string(),
+  paidAt: z.string(),
+  canceledAt: z.string().nullable().optional(),
+  client: z.object({
+    id: z.string(),
+    fullName: z.string(),
+  }),
+  user: z.object({
+    id: z.string(),
+    fullName: z.string(),
+  }),
+  appointment: z.object({
+    id: z.string(),
+  }),
 });
 
 /* =========================
@@ -168,6 +192,9 @@ export type TurnoCreateData = z.infer<typeof turnoCreateSchema>;
 export type Appointment = z.infer<typeof appointmentSchema>;
 
 export type PagoFormData = z.infer<typeof pagoSchema>;
+export type Payment = z.infer<typeof paymentSchema>;
+export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
+export type PaymentStatus = z.infer<typeof paymentStatusSchema>;
 
 export type User = z.infer<typeof userSchema>;
 export type Business = z.infer<typeof businessSchema>;

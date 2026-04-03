@@ -2,7 +2,9 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PaymentMethod, PaymentStatus } from '../enums/payments.enum';
@@ -41,7 +43,8 @@ export class Payment {
   @ManyToOne(() => Business)
   business: Business;
 
-  @ManyToOne(() => Appointment, (appointment) => appointment.payments)
+  @OneToOne(() => Appointment)
+  @JoinColumn()
   appointment: Appointment;
 
   @ManyToOne(() => Client, (client) => client.payments)

@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { AppointmentStatus } from '../enums/appointment-status.enum';
 import { Business } from 'src/business/entities/business.entity';
 import { Client } from 'src/clients/entities/client.entity';
@@ -46,8 +46,6 @@ export class Appointment {
   })
   service: Service;
 
-  @OneToMany(() => Payment, (payment) => payment.appointment, {
-    cascade: true,
-  })
-  payments?: Payment[];
+  @OneToOne(() => Payment, (payment) => payment.appointment)
+  payment?: Payment;
 }

@@ -1,32 +1,32 @@
-"use client";
+'use client';
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Controller } from "react-hook-form";
-import { Client, Service } from "@/schemas";
-import { useClients } from "@/hooks/panel/clients/useClients";
-import { useServices } from "@/hooks/panel/services/useServices";
-import { useCreateAppointment } from "@/hooks/panel/appointments/useCreateAppointment";
-import { useProfile } from "@/hooks/profile/useProfile";
-import { toast } from "sonner";
+} from '@/components/ui/select';
+import { Controller } from 'react-hook-form';
+import { Appointment, Client, Service } from '@/schemas';
+import { useClients } from '@/hooks/panel/clients/useClients';
+import { useServices } from '@/hooks/panel/services/useServices';
+import { useCreateAppointment } from '@/hooks/panel/appointments/useCreateAppointment';
+import { useProfile } from '@/hooks/profile/useProfile';
+import { toast } from 'sonner';
 
 type TurnoFormRaw = {
   clienteId: string;
@@ -36,10 +36,10 @@ type TurnoFormRaw = {
 };
 
 const turnoFormSchema = z.object({
-  clienteId: z.string().min(1, "Seleccioná un cliente"),
-  servicioId: z.string().min(1, "Seleccioná un servicio"),
-  fecha: z.string().min(1, "Seleccioná una fecha"),
-  hora: z.string().min(1, "Seleccioná una hora"),
+  clienteId: z.string().min(1, 'Seleccioná un cliente'),
+  servicioId: z.string().min(1, 'Seleccioná un servicio'),
+  fecha: z.string().min(1, 'Seleccioná una fecha'),
+  hora: z.string().min(1, 'Seleccioná una hora'),
 });
 
 interface Props {
@@ -61,7 +61,7 @@ export function TurnoModal({ open, onClose }: Props) {
   const onSubmit = async (data: TurnoFormRaw) => {
     const userId = profile?.id;
     if (!userId) {
-      toast.error("No se pudo obtener el usuario actual");
+      toast.error('No se pudo obtener el usuario actual');
       return;
     }
 
@@ -111,7 +111,7 @@ export function TurnoModal({ open, onClose }: Props) {
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger
-                    className={errors.clienteId ? "border-destructive" : ""}
+                    className={errors.clienteId ? 'border-destructive' : ''}
                   >
                     <SelectValue placeholder="Seleccioná un cliente" />
                   </SelectTrigger>
@@ -141,7 +141,7 @@ export function TurnoModal({ open, onClose }: Props) {
               render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger
-                    className={errors.servicioId ? "border-destructive" : ""}
+                    className={errors.servicioId ? 'border-destructive' : ''}
                   >
                     <SelectValue placeholder="Seleccioná un servicio" />
                   </SelectTrigger>
@@ -149,7 +149,7 @@ export function TurnoModal({ open, onClose }: Props) {
                     {servicios.map((s: Service) => (
                       <SelectItem key={s.id} value={s.id}>
                         {s.name} — {s.duration} min · $
-                        {s.price.toLocaleString("es-AR")}
+                        {s.price.toLocaleString('es-AR')}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -170,8 +170,8 @@ export function TurnoModal({ open, onClose }: Props) {
               <Input
                 id="fecha"
                 type="date"
-                className={errors.fecha ? "border-destructive" : ""}
-                {...register("fecha")}
+                className={errors.fecha ? 'border-destructive' : ''}
+                {...register('fecha')}
               />
               {errors.fecha && (
                 <p className="text-xs text-destructive">
@@ -184,8 +184,8 @@ export function TurnoModal({ open, onClose }: Props) {
               <Input
                 id="hora"
                 type="time"
-                className={errors.hora ? "border-destructive" : ""}
-                {...register("hora")}
+                className={errors.hora ? 'border-destructive' : ''}
+                {...register('hora')}
               />
               {errors.hora && (
                 <p className="text-xs text-destructive">
@@ -207,7 +207,7 @@ export function TurnoModal({ open, onClose }: Props) {
               Cancelar
             </Button>
             <Button type="submit" disabled={createAppointment.isPending}>
-              {createAppointment.isPending ? "Reservando..." : "Reservar turno"}
+              {createAppointment.isPending ? 'Reservando...' : 'Reservar turno'}
             </Button>
           </DialogFooter>
         </form>
